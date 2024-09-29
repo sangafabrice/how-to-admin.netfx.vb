@@ -1,14 +1,14 @@
-<#PSScriptInfo .VERSION 1.0.0#>
+<#PSScriptInfo .VERSION 1.0.1#>
 
 [CmdletBinding()]
 param ([string] $Root)
 
-git add *.vb *.ps*1
+git add *.vb *.ps*1 cvmd2html.manifest
 
 & {
   # Set the version of the executable
   $infoFilePath = "$Root\src\AssemblyInfo.vb"
-  $diffLines = git diff HEAD *.vb
+  $diffLines = git diff HEAD *.vb cvmd2html.manifest
   if ($null -ne $diffLines) {
     $matchRegex = '"(?<Version>((\d+\.){3})\d+)"'
     $diff = [Math]::Abs(($diffLines | ForEach-Object { switch ($_[0]) { "+"{1} "-"{-1} } } | Measure-Object -Sum).Sum)
