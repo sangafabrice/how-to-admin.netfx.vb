@@ -1,4 +1,4 @@
-<#PSScriptInfo .VERSION 1.0.4#>
+<#PSScriptInfo .VERSION 1.0.5#>
 
 using namespace System.Management.Automation
 [CmdletBinding()]
@@ -33,7 +33,7 @@ Param ()
   # Compile the source code with vbc.exe.
   $EnvPath = $Env:Path
   $Env:Path = "$Env:windir\Microsoft.NET\Framework$(If ([Environment]::Is64BitOperatingSystem) { '64' })\v4.0.30319\;$Env:Path"
-  vbc.exe /nologo /target:$($DebugPreference -eq 'Continue' ? 'exe':'winexe') /win32icon:"$PSScriptRoot\menu.ico" /reference:"$BinDir\Interop.IWshRuntimeLibrary.dll" /reference:"$BinDir\PresentationFramework.dll" /reference:"$BinDir\PresentationCore.dll" /reference:"$BinDir\WindowsBase.dll" /reference:System.Xaml.dll /out:$(($ConvertExe = "$BinDir\cvmd2html.exe")) "$(($SrcDir = "$PSScriptRoot\src"))\AssemblyInfo.vb" "$SrcDir\ErrorLog.vb" "$SrcDir\Package.vb" "$SrcDir\Parameters.vb" "$PSScriptRoot\Program.vb" "$SrcDir\Setup.vb" "$SrcDir\Util.vb"
+  vbc.exe /nologo /target:$($DebugPreference -eq 'Continue' ? 'exe':'winexe') /win32icon:"$PSScriptRoot\menu.ico" /win32manifest:"$PSScriptRoot\manifest.xml" /reference:"$BinDir\Interop.IWshRuntimeLibrary.dll" /reference:"$BinDir\PresentationFramework.dll" /reference:"$BinDir\PresentationCore.dll" /reference:"$BinDir\WindowsBase.dll" /reference:System.Xaml.dll /out:$(($ConvertExe = "$BinDir\cvmd2html.exe")) "$(($SrcDir = "$PSScriptRoot\src"))\AssemblyInfo.vb" "$SrcDir\ErrorLog.vb" "$SrcDir\Package.vb" "$SrcDir\Parameters.vb" "$PSScriptRoot\Program.vb" "$SrcDir\Setup.vb" "$SrcDir\Util.vb"
   $Env:Path = $EnvPath
 
   If ($LASTEXITCODE -eq 0) {
