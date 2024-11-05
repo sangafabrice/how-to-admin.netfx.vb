@@ -1,25 +1,16 @@
 ''' <summary>Some utility methods.</summary>
-''' <version>0.0.1.0</version>
+''' <version>0.0.1.1</version>
 
 Imports System.IO
 Imports System.Runtime.InteropServices
 Imports System.Windows
+Imports WbemScripting
 
 Namespace cvmd2html
   Module Util
-    Dim wbemLocator = CreateObject("WbemScripting.SWbemLocator")
-    Dim wmiService = wbemLocator.ConnectServer
-    Friend Registry = GetObject("StdRegProv")
-
-    ''' <summary>Get a WMI object or class.</summary>
-    ''' <param name="monikerPath">The moniker path.</param>
-    ''' <returns>A WMI object or class.</returns>
-    Function GetObject(Optional monikerPath As String = Nothing)
-      If IsNothing(monikerPath) Then
-        Return wmiService
-      End If
-      Return wmiService.Get(monikerPath)
-    End Function
+    Dim wbemLocator = New SWbemLocator
+    Friend WmiService As SWbemServices = wbemLocator.ConnectServer
+    Friend Registry As SWbemObject = WmiService.Get("StdRegProv")
 
     ''' <summary>Delete the specified file.</summary>
     ''' <param name="extension">The file extension.</param>
@@ -48,7 +39,7 @@ Namespace cvmd2html
     ''' <summary>Destroy the COM objects.</summary>
     Sub Dispose
       ReleaseComObject(Registry)
-      ReleaseComObject(wmiService)
+      ReleaseComObject(WmiService)
       ReleaseComObject(wbemLocator)
     End Sub
 
