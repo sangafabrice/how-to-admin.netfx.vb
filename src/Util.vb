@@ -1,17 +1,12 @@
 ''' <summary>Some utility methods.</summary>
-''' <version>0.0.1.1</version>
+''' <version>0.0.1.2</version>
 
 Imports System.IO
 Imports System.Runtime.InteropServices
 Imports System.Windows
-Imports WbemScripting
 
 Namespace cvmd2html
   Module Util
-    Dim wbemLocator = New SWbemLocator
-    Friend WmiService As SWbemServices = wbemLocator.ConnectServer
-    Friend Registry As SWbemObject = WmiService.Get("StdRegProv")
-
     ''' <summary>Delete the specified file.</summary>
     ''' <param name="extension">The file extension.</param>
     ''' <returns>A random file name.</returns>
@@ -36,13 +31,6 @@ Namespace cvmd2html
       MessageBox.Show(messageText, "Convert to HTML", popupButtons, popupType)
     End Sub
 
-    ''' <summary>Destroy the COM objects.</summary>
-    Sub Dispose
-      ReleaseComObject(Registry)
-      ReleaseComObject(WmiService)
-      ReleaseComObject(wbemLocator)
-    End Sub
-
     ''' <summary>Release the specified COM object.</summary>
     ''' <param name="comObject">The COM object to destroy.</param>
     Sub ReleaseComObject(Of T)(ByRef comObject As T)
@@ -53,7 +41,6 @@ Namespace cvmd2html
     ''' <summary>Clean up and quit.</summary>
     ''' <param name="exitCode">The exit code.</param>
     Sub Quit(exitCode As Integer)
-      Dispose
       GC.Collect
       Environment.Exit(exitCode)
     End Sub
