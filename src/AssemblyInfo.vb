@@ -4,5 +4,5 @@ Imports System.Reflection
 <Assembly: AssemblyCopyright("© 2024 sangafabrice")>
 <Assembly: AssemblyCompany("sangafabrice")>
 <Assembly: AssemblyTitle("CvMd2Html")>
-<Assembly: AssemblyInformationalVersion("0.0.1.0")>
-<Assembly: AssemblyVersion("0.0.1.0")>
+<Assembly: AssemblyInformationalVersion("0.0.1.3")>
+<Assembly: AssemblyVersion("0.0.1.3")>

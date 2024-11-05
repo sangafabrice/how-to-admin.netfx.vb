@@ -1,12 +1,15 @@
 ''' <summary>Launch the shortcut's target PowerShell script with the markdown.</summary>
-''' <version>0.0.1.0</version>
+''' <version>0.0.1.1</version>
 
 Imports System.Diagnostics
+Imports System.Reflection
+Imports WbemScripting
+Imports Shell32
 
 Namespace cvmd2html
   Module Program
-    Sub Main()
-      RequestAdminPrivileges()
+    Sub Main(args As String())
+      RequestAdminPrivileges(args)
 
       ' The application execution.
       If MarkdownPathParam IsNot Nothing Then
@@ -51,20 +54,21 @@ Namespace cvmd2html
       ' The process termination event query. Win32_ProcessStopTrace requires admin rights to be used.
       Dim wqlQuery As String = "SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName='cmd.exe' AND ProcessId=" & processId
       ' Wait for the process to exit.
-      Dim watcher = GetObject.ExecNotificationQuery(wqlQuery)
-      Dim cmdProcess = watcher.NextEvent()
+      Dim watcher As SWbemEventSource = WmiService.ExecNotificationQuery(wqlQuery)
+      Dim cmdProcess As SWbemObject = watcher.NextEvent()
       WaitForExit = cmdProcess.ExitStatus
       ReleaseComObject(cmdProcess)
       ReleaseComObject(watcher)
     End Function
 
     ''' <summary>Request administrator privileges.</summary>
+    ''' <param name="args">The command line arguments.</param>
     Private _
-    Sub RequestAdminPrivileges()
+    Sub RequestAdminPrivileges(args As String())
       If IsCurrentProcessElevated() Then Exit Sub
-      Dim shell = CreateObject("Shell.Application")
-      shell.ShellExecute(AssemblyLocation, Command(),, "runas", vbHidden)
-      ReleaseComObject(shell)
+      Dim shellApp = New Shell()
+      shellApp.ShellExecute(AssemblyLocation, If(UBound(args) >= 0, String.Format("""{0}""", Join(args, """ """)), Missing.Value),, "runas", vbHidden)
+      ReleaseComObject(shellApp)
       Quit(0)
     End Sub
 
