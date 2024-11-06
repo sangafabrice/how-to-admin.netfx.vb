@@ -1,4 +1,4 @@
-<#PSScriptInfo .VERSION 1.0.2#>
+<#PSScriptInfo .VERSION 1.0.3#>
 
 using namespace System.Management.Automation
 [CmdletBinding()]
@@ -26,7 +26,7 @@ Param ()
     $EnvPath = $Env:Path
     $Env:Path = "$Env:windir\Microsoft.NET\Framework$(If ([Environment]::Is64BitOperatingSystem) { '64' })\v4.0.30319\;$Env:Path"
     $FileName = $ClassName.Replace('_', '.')
-    vbc.exe /nologo /target:library /reference:"$LibDir\Interop.WbemScripting.dll" /out:"$LibDir\$FileName.dll" "$(($SrcDir = "$PSScriptRoot\src"))\AssemblyInfo.vb" "$SrcDir\$FileName.vb"
+    vbc.exe /nologo /target:library /out:"$LibDir\$FileName.dll" "$(($SrcDir = "$PSScriptRoot\src"))\AssemblyInfo.vb" "$SrcDir\$FileName.vb"
     $Env:Path = $EnvPath
   }
 
@@ -48,7 +48,6 @@ Param ()
     & "$PSScriptRoot\TlbImp.exe" /nologo /silent $TypeLibPath /out:"$LibDir\Interop.$Namespace.dll" /namespace:$Namespace
   }
 
-  ImportTypeLibrary 'C:\Windows\System32\wbem\wbemdisp.tlb' 'WbemScripting'
   ImportTypeLibrary 'C:\Windows\System32\wshom.ocx' 'IWshRuntimeLibrary'
   ImportMgmtClass StdRegProv
 
