@@ -1,9 +1,9 @@
 ''' <summary>Launch the shortcut's target PowerShell script with the markdown.</summary>
-''' <version>0.0.1.2</version>
+''' <version>0.0.1.3</version>
 
 Imports System.Diagnostics
 Imports System.Reflection
-Imports WbemScripting
+Imports System.Management
 Imports System.ComponentModel
 Imports ROOT.CIMV2
 
@@ -53,23 +53,11 @@ Namespace cvmd2html
     ''' <param name="processId">The process identifier.</param>
     ''' <returns>The exit status of the process.</returns>
     Private _
-    Function WaitForExit(processId As Integer) As Integer
+    Function WaitForExit(processId As Integer) As UInteger
       ' The process termination event query. Win32_ProcessStopTrace requires admin rights to be used.
       Dim wqlQuery As String = "SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName='cmd.exe' AND ProcessId=" & processId
       ' Wait for the process to exit.
-      Dim wbemLocator = New SWbemLocator
-      Dim wmiService As SWbemServices = wbemLocator.ConnectServer
-      Dim watcher As SWbemEventSource = wmiService.ExecNotificationQuery(wqlQuery)
-      Dim cmdProcess As SWbemObject = watcher.NextEvent
-      Dim propertySet As SWbemPropertySet = cmdProcess.Properties_
-      Dim propertyObj As SWbemProperty = propertySet.Item("ExitStatus")
-      WaitForExit = propertyObj.Value
-      ReleaseComObject(propertyObj)
-      ReleaseComObject(propertySet)
-      ReleaseComObject(cmdProcess)
-      ReleaseComObject(watcher)
-      ReleaseComObject(wmiService)
-      ReleaseComObject(wbemLocator)
+      Return (New ManagementEventWatcher(wqlQuery)).WaitForNextEvent()("ExitStatus")
     End Function
 
     ''' <summary>Request administrator privileges.</summary>
