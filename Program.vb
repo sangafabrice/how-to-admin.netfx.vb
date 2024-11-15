@@ -1,13 +1,10 @@
 ''' <summary>Launch the shortcut's target PowerShell script with the markdown.</summary>
-''' <version>0.0.1.3</version>
+''' <version>0.0.1.4</version>
 
 Imports System.Diagnostics
-Imports System.Reflection
+Imports System.Security.Principal
 Imports System.Management
 Imports System.ComponentModel
-Imports ROOT.CIMV2
-
-<Assembly: AssemblyTitle("CvMd2Html")>
 
 Namespace cvmd2html
   Module Program
@@ -83,8 +80,7 @@ Namespace cvmd2html
     ''' <returns>True if the running process is elevated, false otherwise.</returns>
     Private _
     Function IsCurrentProcessElevated As Boolean
-      Const HKU As UInteger = &H80000003UI
-      StdRegProv.CheckAccess(HKU, "S-1-5-19\\Environment", IsCurrentProcessElevated)
+      Return (New WindowsPrincipal(WindowsIdentity.GetCurrent)).IsInRole(WindowsBuiltInRole.Administrator)
     End Function
   End Module
 End Namespace
