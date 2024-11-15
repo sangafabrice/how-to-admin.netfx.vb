@@ -1,15 +1,12 @@
 ''' <summary>Launch the shortcut's target PowerShell script with the markdown.</summary>
-''' <version>0.0.1.2</version>
+''' <version>0.0.1.3</version>
 
 Imports System.Diagnostics
-Imports System.Security.Principal
 Imports System.Management
 
 Namespace cvmd2html
   Module Program
-    Sub Main(args As String())
-      RequestAdminPrivileges(args)
-
+    Sub Main
       ' The application execution.
       If MarkdownPathParam IsNot Nothing Then
         Const CMD_EXE As String = "C:\Windows\System32\cmd.exe"
@@ -54,30 +51,6 @@ Namespace cvmd2html
       Dim wqlQuery As String = "SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName='cmd.exe' AND ProcessId=" & processId
       ' Wait for the process to exit.
       Return (New ManagementEventWatcher(wqlQuery)).WaitForNextEvent()("ExitStatus")
-    End Function
-
-    ''' <summary>Request administrator privileges.</summary>
-    ''' <param name="args">The command line arguments.</param>
-    Private _
-    Sub RequestAdminPrivileges(args As String())
-      If IsCurrentProcessElevated() Then Exit Sub
-      Try
-        Process.Start(New ProcessStartInfo(AssemblyLocation, If(UBound(args) >= 0, String.Format("""{0}""", Join(args, """ """)), "")) With {
-            .UseShellExecute = true,
-            .Verb = "runas",
-            .WindowStyle = ProcessWindowStyle.Hidden
-          })
-      Catch
-        Quit(1)
-      End Try
-      Quit(0)
-    End Sub
-
-    ''' <summary>Check if the process is elevated.</summary>
-    ''' <returns>True if the running process is elevated, false otherwise.</returns>
-    Private _
-    Function IsCurrentProcessElevated() As Boolean
-      Return (New WindowsPrincipal(WindowsIdentity.GetCurrent)).IsInRole(WindowsBuiltInRole.Administrator)
     End Function
   End Module
 End Namespace
