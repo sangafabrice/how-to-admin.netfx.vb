@@ -1,10 +1,9 @@
 ''' <summary>Launch the shortcut's target PowerShell script with the markdown.</summary>
-''' <version>0.0.1.1</version>
+''' <version>0.0.1.2</version>
 
 Imports System.Diagnostics
-Imports System.Reflection
-Imports WbemScripting
-Imports Shell32
+Imports System.Security.Principal
+Imports System.Management
 
 Namespace cvmd2html
   Module Program
@@ -50,15 +49,11 @@ Namespace cvmd2html
     ''' <param name="processId">The process identifier.</param>
     ''' <returns>The exit status of the process.</returns>
     Private _
-    Function WaitForExit(processId As Integer) As Integer
+    Function WaitForExit(processId As Integer) As UInteger
       ' The process termination event query. Win32_ProcessStopTrace requires admin rights to be used.
       Dim wqlQuery As String = "SELECT * FROM Win32_ProcessStopTrace WHERE ProcessName='cmd.exe' AND ProcessId=" & processId
       ' Wait for the process to exit.
-      Dim watcher As SWbemEventSource = WmiService.ExecNotificationQuery(wqlQuery)
-      Dim cmdProcess As SWbemObject = watcher.NextEvent()
-      WaitForExit = cmdProcess.ExitStatus
-      ReleaseComObject(cmdProcess)
-      ReleaseComObject(watcher)
+      Return (New ManagementEventWatcher(wqlQuery)).WaitForNextEvent()("ExitStatus")
     End Function
 
     ''' <summary>Request administrator privileges.</summary>
@@ -66,9 +61,15 @@ Namespace cvmd2html
     Private _
     Sub RequestAdminPrivileges(args As String())
       If IsCurrentProcessElevated() Then Exit Sub
-      Dim shellApp = New Shell()
-      shellApp.ShellExecute(AssemblyLocation, If(UBound(args) >= 0, String.Format("""{0}""", Join(args, """ """)), Missing.Value),, "runas", vbHidden)
-      ReleaseComObject(shellApp)
+      Try
+        Process.Start(New ProcessStartInfo(AssemblyLocation, If(UBound(args) >= 0, String.Format("""{0}""", Join(args, """ """)), "")) With {
+            .UseShellExecute = true,
+            .Verb = "runas",
+            .WindowStyle = ProcessWindowStyle.Hidden
+          })
+      Catch
+        Quit(1)
+      End Try
       Quit(0)
     End Sub
 
@@ -76,8 +77,7 @@ Namespace cvmd2html
     ''' <returns>True if the running process is elevated, false otherwise.</returns>
     Private _
     Function IsCurrentProcessElevated() As Boolean
-      Const HKU As Integer = &H80000003
-      Registry.CheckAccess(HKU, "S-1-5-19\\Environment",, IsCurrentProcessElevated)
+      Return (New WindowsPrincipal(WindowsIdentity.GetCurrent)).IsInRole(WindowsBuiltInRole.Administrator)
     End Function
   End Module
 End Namespace
